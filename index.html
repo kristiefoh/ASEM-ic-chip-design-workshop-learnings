@@ -129,12 +129,12 @@ input[type=search],input[type=text],textarea{background:#0a112c;color:white;bord
 </section>
 
 <section class="view" id="view-learn">
-<div class="eyebrow">01 / GUIDED LEARNING</div><h2>Learn modules</h2><p class="lead">Choose a workshop day, then open its subtopic tabs. New jargon words are clickable throughout the lessons.</p>
+<div class="eyebrow">01 / GUIDED LEARNING</div><h2>Learn modules</h2><p class="lead">Choose a workshop day and subtopic. Every subtopic has its own independent learning log.</p>
 <div class="tabs" id="dayTabs"></div>
 <div class="modulelayout"><div class="modulecontent"><div class="tabs" id="subTabs"></div><article class="subpanel" id="lessonContent"></article></div><aside class="sidebox"><div class="eyebrow">MODULE PROGRESS</div><h3 id="moduleProgress">0 / 6 checkpoints</h3><div class="track"><div class="fill" id="moduleFill"></div></div><p id="moduleHint">Complete a checkpoint when you can explain it in your own words.</p><button class="btn small" onclick="quizDay=day;showView('quiz')">Go to this day's quiz →</button><hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><div class="eyebrow">STUDY HELPER</div><p>Ask about the topic you're reading, or use the chatbot tab for a longer conversation.</p><button class="btn secondary small" onclick="showView('tutor')">Open study chatbot</button></aside></div>
 <div class="daynotebook">
   <div class="notebookhead">
-    <div><div class="eyebrow">YOUR PRIVATE WORKSPACE · DAY <span id="notebookDayLabel">01</span></div><h3 id="notebookTitle">My Day 1 Notes</h3><div class="muted">A document-style space for your own explanations, screenshots, diagrams and workshop notes.</div></div>
+    <div><div class="eyebrow">YOUR PRIVATE WORKSPACE · DAY <span id="notebookDayLabel">01</span></div><h3 id="notebookTitle">My Day 1 Notes</h3><div class="muted">A separate learning log for this exact subtopic. Your notes stay independent from every other subtopic.</div></div>
     <span class="badge">Saved on this device</span>
   </div>
   <div class="notebooktools">
@@ -150,8 +150,14 @@ input[type=search],input[type=text],textarea{background:#0a112c;color:white;bord
     <button class="btn secondary small" onclick="insertFlowDiagram()">＋ Flow diagram</button>
     <button class="btn secondary small" onclick="insertNoteDivider()">＋ Divider</button>
   </div>
-  <div id="dayDocEditor" class="doceditor" contenteditable="true" spellcheck="true" data-placeholder="Start writing your Day notes here...&#10;&#10;Try summarising a concept in your own words, paste a screenshot, add a diagram, or write questions for your instructor."></div>
-  <div class="notebookfoot"><span id="notebookSaveStatus" class="notebookstatus">Autosaves as you type</span><span>Tip: select text before using formatting tools. Images and diagrams are stored with this day's notes.</span><button class="btn small" onclick="exportDayDoc()">Export this day ↓</button></div>
+  <div id="dayDocEditor" class="doceditor" contenteditable="true" spellcheck="true" data-placeholder="Write what you learned about this subtopic...&#10;&#10;Try summarising a concept in your own words, paste a screenshot, add a diagram, or write questions for your instructor."></div>
+  <details id="legacyDayNotes" class="card" style="margin-top:12px;display:none">
+    <summary style="cursor:pointer;font-weight:700">Previously saved day-wide notes (kept safely)</summary>
+    <p class="muted">These notes were saved before notes were separated by subtopic. They are preserved here and are not mixed into your new individual learning logs.</p>
+    <div id="legacyDayDocContent" class="doceditor" style="min-height:100px" contenteditable="false"></div>
+    <div class="notebookfoot"><button class="btn small" onclick="exportLegacyDayDoc()">Export previous day-wide notes ↓</button></div>
+  </details>
+  <div class="notebookfoot"><span id="notebookSaveStatus" class="notebookstatus">Autosaves as you type</span><span>Tip: select text before using formatting tools. Images and diagrams are saved with this subtopic.</span><button class="btn small" onclick="exportDayDoc()">Export this subtopic ↓</button></div>
 </div>
 </section>
 
@@ -331,22 +337,32 @@ if(/example/.test(lower)&&hits.length)answer+="\n\nSimple example: think of "+hi
 if(!answer){let found=modules.find(m=>lower.includes(m.short.toLowerCase())||lower.includes(m.title.toLowerCase().split(" ")[0]));if(found)answer=found.title+": "+found.sub.map(s=>s.title).join("; ")+". Open Learn modules to explore these topics in detail.";else answer="I couldn't find a precise answer in this local beginner guide. Try asking about a specific term such as RTL, Verilog, synthesis, placement, CTS, setup time or slack. You can also ask me to compare two concepts. For tool-specific commands or details not covered here, check with your ASEM instructor."}
 addBubble("bot",answer+"\n\nStudy tip: try explaining the idea back in one or two sentences. If you can do that without looking, you're building understanding.");}
 
-// Day-by-day document workspace. Each day's content is stored separately.
-function dayDocKey(i=day){return "snv2_daydoc_"+i}
+// Each subtopic has its own independent learning log.
+// Old day-wide notes are preserved under snv2_daydoc_0 ... snv2_daydoc_4 as a read-only archive.
+function subtopicDocKey(d=day,s=sub){return "snv2_subdoc_"+d+"_"+s}
+function legacyDayDocKey(d=day){return "snv2_daydoc_"+d}
 function loadDayDoc(){
   const editor=document.getElementById("dayDocEditor");
   if(!editor)return;
-  editor.innerHTML=localStorage.getItem(dayDocKey())||"";
+  const topic=modules[day].sub[sub];
+  editor.innerHTML=localStorage.getItem(subtopicDocKey())||"";
   document.getElementById("notebookDayLabel").textContent=String(day+1).padStart(2,"0");
-  document.getElementById("notebookTitle").textContent="My Day "+(day+1)+" Notes";
-  document.getElementById("notebookSaveStatus").textContent="Autosaves as you type";
+  document.getElementById("notebookTitle").textContent=topic.title+" — Learning Log";
+  document.getElementById("notebookSaveStatus").textContent="Autosaves for this subtopic";
+  const legacy=localStorage.getItem(legacyDayDocKey())||"";
+  const archive=document.getElementById("legacyDayNotes");
+  const archiveContent=document.getElementById("legacyDayDocContent");
+  if(archive&&archiveContent){
+    archive.style.display=legacy.trim()?"block":"none";
+    archiveContent.innerHTML=legacy;
+  }
 }
 function saveDayDoc(){
   const editor=document.getElementById("dayDocEditor");
   if(!editor)return;
   try{
-    localStorage.setItem(dayDocKey(),editor.innerHTML);
-    document.getElementById("notebookSaveStatus").textContent="✓ Saved just now";
+    localStorage.setItem(subtopicDocKey(),editor.innerHTML);
+    document.getElementById("notebookSaveStatus").textContent="✓ Saved for "+modules[day].sub[sub].title;
   }catch(e){
     document.getElementById("notebookSaveStatus").textContent="Storage is full — export your notes and use smaller images";
   }
@@ -404,8 +420,15 @@ function insertCanvasDiagram(){
 }
 function exportDayDoc(){
   const content=document.getElementById("dayDocEditor").innerHTML;
-  const doc=`<!doctype html><html><head><meta charset="utf-8"><title>Silicon Nights — Day ${day+1} Notes</title><style>body{font:16px/1.7 Arial,sans-serif;max-width:850px;margin:40px auto;padding:0 20px;color:#202033}img,svg{max-width:100%;height:auto}figure{border:1px solid #ddd;padding:15px;border-radius:10px}figcaption{color:#666;font-size:13px}</style></head><body><h1>Silicon Nights — Day ${day+1} Notes</h1>${content}</body></html>`;
-  const blob=new Blob([doc],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`silicon-nights-day-${day+1}-notes.html`;a.click();URL.revokeObjectURL(url);
+  const title=modules[day].sub[sub].title;
+  const doc=`<!doctype html><html><head><meta charset="utf-8"><title>Silicon Nights — ${escapeDocText(title)}</title><style>body{font:16px/1.7 Arial,sans-serif;max-width:850px;margin:40px auto;padding:0 20px;color:#202033}img,svg{max-width:100%;height:auto}figure{border:1px solid #ddd;padding:15px;border-radius:10px}figcaption{color:#666;font-size:13px}</style></head><body><h1>Silicon Nights — Day ${day+1}: ${escapeDocText(title)}</h1>${content}</body></html>`;
+  const blob=new Blob([doc],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`silicon-nights-day-${day+1}-subtopic-${sub+1}-notes.html`;a.click();URL.revokeObjectURL(url);
+}
+function exportLegacyDayDoc(){
+  const content=localStorage.getItem(legacyDayDocKey())||"";
+  if(!content){alert("There are no previous day-wide notes for this day.");return;}
+  const doc=`<!doctype html><html><head><meta charset="utf-8"><title>Silicon Nights — Previous Day ${day+1} Notes</title><style>body{font:16px/1.7 Arial,sans-serif;max-width:850px;margin:40px auto;padding:0 20px;color:#202033}img,svg{max-width:100%;height:auto}</style></head><body><h1>Silicon Nights — Previous Day ${day+1} Notes</h1>${content}</body></html>`;
+  const blob=new Blob([doc],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`silicon-nights-day-${day+1}-previous-notes.html`;a.click();URL.revokeObjectURL(url);
 }
 
 function saveJournal(){["jLearned","jConfused","jQuestions","jNext"].forEach(id=>localStorage.setItem("sn2_"+id,document.getElementById(id).value));alert("Journal saved in this browser.")}
