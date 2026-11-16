@@ -73,13 +73,33 @@ input[type=search],input[type=text],textarea{background:#0a112c;color:white;bord
 .mobilebar{display:none}
 @media(max-width:950px){.layout{grid-template-columns:190px 1fr}.modulelayout{grid-template-columns:1fr}.daytiles{grid-template-columns:repeat(3,1fr)}.grid.cards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:680px){body{overflow:auto}.app{height:auto;min-height:100vh;display:block}.topbar{height:62px;padding:0 14px}.topright .pill{display:none}.layout{display:block}.sidebar{position:sticky;top:0;z-index:5;display:flex;flex-direction:row;overflow-x:auto;padding:8px;background:rgba(8,12,31,.94);border-right:0;border-bottom:1px solid var(--line)}.navlabel,.sideprogress{display:none}.navbtn{min-width:max-content;width:auto;padding:8px 11px;font-size:12px}.navicon{display:none}.main{overflow:visible;padding:20px 14px 35px}.hero{grid-template-columns:1fr}.heroart{min-height:190px}.chip{width:140px;height:140px}.orbit{width:205px;height:205px}.grid.stats{grid-template-columns:repeat(2,1fr)}.daytiles{grid-template-columns:repeat(2,1fr)}.grid.cards,.glossarygrid{grid-template-columns:1fr 1fr}.journalgrid{grid-template-columns:1fr}.sectionhead{display:block}.chatbox{height:65vh;max-height:none}}
+
+/* Per-day document workspace */
+.daynotebook{margin-top:20px;border:1px solid rgba(255,143,203,.28);border-radius:17px;background:rgba(15,21,49,.92);overflow:hidden;box-shadow:var(--shadow)}
+.notebookhead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px 19px;border-bottom:1px solid var(--line);background:linear-gradient(100deg,rgba(244,107,180,.10),rgba(124,157,255,.09))}
+.notebookhead h3{margin:0}.notebooktools{display:flex;flex-wrap:wrap;gap:7px;padding:12px 15px;border-bottom:1px solid var(--line);background:rgba(8,13,34,.72)}
+.notebooktools button,.notebooktools label{font-size:12px}
+.doceditor{min-height:340px;padding:25px clamp(16px,3vw,38px);outline:none;color:#f1efff;line-height:1.8;font-size:15px;background:rgba(9,14,35,.52)}
+.doceditor:empty:before{content:attr(data-placeholder);color:#858bad;pointer-events:none}
+.doceditor h2,.doceditor h3{color:#ffd9ed}.doceditor p{color:#d6d8eb}.doceditor ul{color:#d6d8eb}
+.doceditor img{display:block;max-width:min(100%,650px);max-height:460px;object-fit:contain;border:1px solid var(--line);border-radius:12px;margin:14px 0;background:#0a112c}
+.doceditor figure{margin:18px 0;padding:14px;border:1px solid rgba(182,156,255,.28);border-radius:13px;background:rgba(124,157,255,.06)}
+.doceditor figure svg{width:100%;height:auto;max-height:260px;display:block}
+.doceditor figure figcaption{font-size:12px;color:#a8accb;margin-top:8px}
+.notebookfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
+.notebookstatus{color:var(--green)}
+.drawmodal{display:none;position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.78);place-items:center;padding:16px}
+.drawmodal.show{display:grid}.drawbox{width:min(850px,100%);background:#151c40;border:1px solid rgba(255,143,203,.4);border-radius:17px;padding:18px;box-shadow:var(--shadow)}
+#diagramCanvas{width:100%;height:330px;display:block;background:#0a112c;border:1px solid var(--line);border-radius:10px;touch-action:none;cursor:crosshair}
+@media(max-width:680px){.notebookhead{align-items:flex-start;flex-direction:column}.doceditor{min-height:280px;padding:17px}}
+
 </style>
 </head>
 <body>
 <canvas id="particles"></canvas>
 <div class="app">
 <header class="topbar">
-<a class="brand" href="#" onclick="showView('home');return false"><span class="logo">⌁</span><span>SILICON <span style="color:var(--pink)">NIGHTS</span><small>ASEM IC DESIGN LEARNING HUB · V2</small></span></a>
+<a class="brand" href="#" onclick="showView('home');return false"><span class="logo">⌁</span><span>SILICON <span style="color:var(--pink)">NIGHTS</span><small>ASEM IC DESIGN LEARNING HUB · V2 + DAY NOTEBOOK</small></span></a>
 <div class="topright"><span class="pill" id="topProgress">0% COMPLETE</span><span class="pill">BEGINNER → INTERMEDIATE</span></div>
 </header>
 <div class="layout">
@@ -112,6 +132,27 @@ input[type=search],input[type=text],textarea{background:#0a112c;color:white;bord
 <div class="eyebrow">01 / GUIDED LEARNING</div><h2>Learn modules</h2><p class="lead">Choose a workshop day, then open its subtopic tabs. New jargon words are clickable throughout the lessons.</p>
 <div class="tabs" id="dayTabs"></div>
 <div class="modulelayout"><div class="modulecontent"><div class="tabs" id="subTabs"></div><article class="subpanel" id="lessonContent"></article></div><aside class="sidebox"><div class="eyebrow">MODULE PROGRESS</div><h3 id="moduleProgress">0 / 6 checkpoints</h3><div class="track"><div class="fill" id="moduleFill"></div></div><p id="moduleHint">Complete a checkpoint when you can explain it in your own words.</p><button class="btn small" onclick="quizDay=day;showView('quiz')">Go to this day's quiz →</button><hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><div class="eyebrow">STUDY HELPER</div><p>Ask about the topic you're reading, or use the chatbot tab for a longer conversation.</p><button class="btn secondary small" onclick="showView('tutor')">Open study chatbot</button></aside></div>
+<div class="daynotebook">
+  <div class="notebookhead">
+    <div><div class="eyebrow">YOUR PRIVATE WORKSPACE · DAY <span id="notebookDayLabel">01</span></div><h3 id="notebookTitle">My Day 1 Notes</h3><div class="muted">A document-style space for your own explanations, screenshots, diagrams and workshop notes.</div></div>
+    <span class="badge">Saved on this device</span>
+  </div>
+  <div class="notebooktools">
+    <button class="btn secondary small" onclick="formatDoc('bold')"><b>B</b></button>
+    <button class="btn secondary small" onclick="formatDoc('italic')"><i>I</i></button>
+    <button class="btn secondary small" onclick="formatDoc('underline')"><u>U</u></button>
+    <button class="btn secondary small" onclick="formatDoc('insertUnorderedList')">• Bullets</button>
+    <button class="btn secondary small" onclick="formatDoc('formatBlock','h2')">Heading</button>
+    <button class="btn secondary small" onclick="formatDoc('formatBlock','p')">Paragraph</button>
+    <label class="btn secondary small" for="dayImageUpload">＋ Add image</label>
+    <input id="dayImageUpload" type="file" accept="image/*" hidden onchange="insertDayImage(this)">
+    <button class="btn secondary small" onclick="openDiagramPad()">＋ Draw diagram</button>
+    <button class="btn secondary small" onclick="insertFlowDiagram()">＋ Flow diagram</button>
+    <button class="btn secondary small" onclick="insertNoteDivider()">＋ Divider</button>
+  </div>
+  <div id="dayDocEditor" class="doceditor" contenteditable="true" spellcheck="true" data-placeholder="Start writing your Day notes here...&#10;&#10;Try summarising a concept in your own words, paste a screenshot, add a diagram, or write questions for your instructor."></div>
+  <div class="notebookfoot"><span id="notebookSaveStatus" class="notebookstatus">Autosaves as you type</span><span>Tip: select text before using formatting tools. Images and diagrams are stored with this day's notes.</span><button class="btn small" onclick="exportDayDoc()">Export this day ↓</button></div>
+</div>
 </section>
 
 <section class="view" id="view-quiz">
@@ -136,8 +177,16 @@ input[type=search],input[type=text],textarea{background:#0a112c;color:white;bord
 <div class="eyebrow">06 / REFLECTION & RETENTION</div><h2>Learning journal</h2><p class="lead">Your notes are saved in this browser. Export a copy if you want to keep them or move them to another device.</p><div class="journalgrid card">
 <div><label>WHAT I LEARNED</label><textarea id="jLearned" rows="5" placeholder="Explain today's ideas in your own words..."></textarea></div><div><label>WHAT I DON'T UNDERSTAND YET</label><textarea id="jConfused" rows="5" placeholder="Write down jargon, tool steps or concepts that are still fuzzy..."></textarea></div><div><label>QUESTIONS FOR THE INSTRUCTORS</label><textarea id="jQuestions" rows="5" placeholder="What do I want to ask during the next session?"></textarea></div><div><label>WHAT I WANT TO EXPLORE NEXT</label><textarea id="jNext" rows="5" placeholder="A concept, tool, career path or project..."></textarea></div></div><div class="actions"><button class="btn" onclick="saveJournal()">Save notes</button><button class="btn secondary" onclick="exportJournal()">Export notes (.txt)</button><button class="btn secondary" onclick="resetProgress()">Reset learning progress</button></div>
 </section>
-<footer class="footer">SILICON NIGHTS · ASEM DIGITAL IC DESIGN WORKSHOP COMPANION · V2<br>Independent learning companion. Not official ASEM material. Progress and notes are stored locally in this browser.</footer>
+<footer class="footer">SILICON NIGHTS · ASEM DIGITAL IC DESIGN WORKSHOP COMPANION · DAY NOTEBOOK EDITION<br>Independent learning companion. Not official ASEM material. Progress and notes are stored locally in this browser.</footer>
 </main></div></div>
+<div class="drawmodal" id="drawModal"><div class="drawbox">
+  <button class="close" onclick="closeDiagramPad()">Close ✕</button>
+  <div class="eyebrow">VISUAL NOTEBOOK</div><h3>Draw a diagram</h3>
+  <p class="muted">Sketch a circuit, timing idea, flow or anything from the workshop. Your drawing will be inserted into this day's notes.</p>
+  <div class="actions" style="margin:10px 0"><label class="muted">Pen colour <input type="color" id="drawColor" value="#ff8fcb" style="width:42px;height:30px;vertical-align:middle"></label><label class="muted">Pen size <input type="range" id="drawSize" min="1" max="12" value="3" style="vertical-align:middle"></label><button class="btn secondary small" onclick="clearDiagramPad()">Clear</button></div>
+  <canvas id="diagramCanvas" width="1100" height="440"></canvas>
+  <div class="actions"><button class="btn" onclick="insertCanvasDiagram()">Insert into notes</button><button class="btn secondary" onclick="closeDiagramPad()">Cancel</button></div>
+</div></div>
 <div class="modal" id="termModal"><div class="modalbox"><button class="close" onclick="closeTerm()">Close ✕</button><div class="eyebrow">JARGON DECODED</div><h3 id="termTitle"></h3><p id="termDefinition" class="muted"></p><button class="btn small" onclick="askTerm()">Ask study helper about this</button></div></div>
 <script>
 const modules=[
@@ -256,7 +305,7 @@ function updateProgress(){let total=modules.reduce((n,m)=>n+m.sub.reduce((x,s)=>
 function modulePct(i){let all=modules[i].sub.reduce((n,s)=>n+s.checks.length,0),d=state.done.filter(x=>x.startsWith(i+"-")).length;return Math.round(d/all*100)}
 function showView(v){document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active",x.id==="view-"+v));document.querySelectorAll(".navbtn").forEach(x=>x.classList.toggle("active",x.dataset.view===v));if(v==="learn")renderLesson();if(v==="quiz")renderQuiz();if(v==="glossary")renderGlossary();if(v==="resources")renderResources();document.querySelector(".main").scrollTop=0}
 function goLearn(i){day=i;sub=0;showView("learn")}
-function renderLesson(){const m=modules[day];document.getElementById("dayTabs").innerHTML=modules.map((x,i)=>`<button class="tab ${i===day?"active":""}" onclick="day=${i};sub=0;renderLesson()">DAY 0${i+1} · ${x.short}</button>`).join("");document.getElementById("subTabs").innerHTML=m.sub.map((x,i)=>`<button class="tab ${i===sub?"active":""}" onclick="sub=${i};renderLesson()">${i+1}. ${x.title}</button>`).join("");const s=m.sub[sub];let checks=s.checks.map((c,k)=>{let key=day+"-"+sub+"-"+k;return `<label class="lessoncheck"><input type="checkbox" ${state.done.includes(key)?"checked":""} onchange="toggleCheck('${key}',this.checked)">${c}</label>`}).join("");document.getElementById("lessonContent").innerHTML=`<div class="eyebrow">DAY 0${day+1} / SUBMODULE ${sub+1} OF ${m.sub.length}</div><h2>${s.title}</h2><p class="muted">${m.title}</p><div class="lessonbody">${s.body}</div><h4>Understanding checkpoints</h4><p class="muted">Tick a checkpoint when you can explain it without reading the page.</p>${checks}<div class="actions"><button class="btn secondary" onclick="sub=Math.max(0,sub-1);renderLesson()" ${sub===0?"disabled":""}>← Previous subtopic</button><button class="btn" onclick="sub=Math.min(${m.sub.length-1},sub+1);renderLesson()">${sub===m.sub.length-1?"Last subtopic":"Next subtopic →"}</button></div>`;let all=m.sub.reduce((n,x)=>n+x.checks.length,0),d=state.done.filter(x=>x.startsWith(day+"-")).length;document.getElementById("moduleProgress").textContent=d+" / "+all+" checkpoints";document.getElementById("moduleFill").style.width=(d/all*100)+"%";document.getElementById("moduleHint").textContent=d===all?"All checkpoints completed. Try the quiz to test retention.":"Complete the checkpoints as you understand each subtopic.";document.querySelectorAll(".jargon").forEach(el=>el.addEventListener("click",()=>openTerm(el.dataset.term)))}
+function renderLesson(){const m=modules[day];loadDayDoc();document.getElementById("dayTabs").innerHTML=modules.map((x,i)=>`<button class="tab ${i===day?"active":""}" onclick="day=${i};sub=0;renderLesson()">DAY 0${i+1} · ${x.short}</button>`).join("");document.getElementById("subTabs").innerHTML=m.sub.map((x,i)=>`<button class="tab ${i===sub?"active":""}" onclick="sub=${i};renderLesson()">${i+1}. ${x.title}</button>`).join("");const s=m.sub[sub];let checks=s.checks.map((c,k)=>{let key=day+"-"+sub+"-"+k;return `<label class="lessoncheck"><input type="checkbox" ${state.done.includes(key)?"checked":""} onchange="toggleCheck('${key}',this.checked)">${c}</label>`}).join("");document.getElementById("lessonContent").innerHTML=`<div class="eyebrow">DAY 0${day+1} / SUBMODULE ${sub+1} OF ${m.sub.length}</div><h2>${s.title}</h2><p class="muted">${m.title}</p><div class="lessonbody">${s.body}</div><h4>Understanding checkpoints</h4><p class="muted">Tick a checkpoint when you can explain it without reading the page.</p>${checks}<div class="actions"><button class="btn secondary" onclick="sub=Math.max(0,sub-1);renderLesson()" ${sub===0?"disabled":""}>← Previous subtopic</button><button class="btn" onclick="sub=Math.min(${m.sub.length-1},sub+1);renderLesson()">${sub===m.sub.length-1?"Last subtopic":"Next subtopic →"}</button></div>`;let all=m.sub.reduce((n,x)=>n+x.checks.length,0),d=state.done.filter(x=>x.startsWith(day+"-")).length;document.getElementById("moduleProgress").textContent=d+" / "+all+" checkpoints";document.getElementById("moduleFill").style.width=(d/all*100)+"%";document.getElementById("moduleHint").textContent=d===all?"All checkpoints completed. Try the quiz to test retention.":"Complete the checkpoints as you understand each subtopic.";document.querySelectorAll(".jargon").forEach(el=>el.addEventListener("click",()=>openTerm(el.dataset.term)))}
 function toggleCheck(k,v){if(v&&!state.done.includes(k))state.done.push(k);if(!v)state.done=state.done.filter(x=>x!==k);saveState();renderLesson()}
 function renderQuiz(){document.getElementById("quizDayTabs").innerHTML=modules.map((m,i)=>`<button class="tab ${quizDay===i?"active":""}" onclick="quizDay=${i};renderQuiz()">DAY 0${i+1} · ${m.short}</button>`).join("");let qs=quizSets[quizDay];document.getElementById("quizContent").innerHTML=`<div class="card"><div class="eyebrow">DAY 0${quizDay+1} · ${qs.length} QUESTIONS</div><h3>${modules[quizDay].title}</h3><p class="muted">Answer all questions. For short responses, include the essential ideas; spelling and exact phrasing do not need to match.</p><div class="track"><div class="fill" style="width:${qs.filter((q,i)=>state.answers[quizDay+"-"+i]===true).length/qs.length*100}%"></div></div></div>`+qs.map((q,i)=>renderQuestion(q,i)).join("")+`<div class="actions"><button class="btn" onclick="showView('learn');day=${quizDay};sub=0;renderLesson()">Review Day 0${quizDay+1} lessons</button><button class="btn secondary" onclick="resetQuiz(${quizDay})">Retry this quiz</button></div>`;document.querySelectorAll(".jargon").forEach(el=>el.addEventListener("click",()=>openTerm(el.dataset.term)))}
 function renderQuestion(q,i){let key=quizDay+"-"+i,prev=state.answers[key];if(q[0]==="MCQ")return `<div class="quizquestion"><div class="qmeta">QUESTION ${i+1} · OBJECTIVE</div><div class="qtext">${q[1]}</div><div class="answers">${q[2].map((a,j)=>`<button class="answer ${prev!==undefined&&j===q[3]?"correct":""}" ${prev!==undefined?"disabled":""} onclick="checkMCQ(${i},${j},this)">${String.fromCharCode(65+j)}. ${a}</button>`).join("")}</div><div class="feedback">${prev===true?"✓ Correct. "+q[4]:prev===false?"Previously attempted. Review: "+q[4]:"Choose one answer."}</div></div>`;
@@ -281,11 +330,91 @@ if(/instructor|ask/.test(lower))answer="Useful questions to ask: 1) Which files 
 if(/example/.test(lower)&&hits.length)answer+="\n\nSimple example: think of "+hits[0][0]+" as a stage in a larger chip-design workflow. Ask what goes into it, what it produces and what problem it solves.";
 if(!answer){let found=modules.find(m=>lower.includes(m.short.toLowerCase())||lower.includes(m.title.toLowerCase().split(" ")[0]));if(found)answer=found.title+": "+found.sub.map(s=>s.title).join("; ")+". Open Learn modules to explore these topics in detail.";else answer="I couldn't find a precise answer in this local beginner guide. Try asking about a specific term such as RTL, Verilog, synthesis, placement, CTS, setup time or slack. You can also ask me to compare two concepts. For tool-specific commands or details not covered here, check with your ASEM instructor."}
 addBubble("bot",answer+"\n\nStudy tip: try explaining the idea back in one or two sentences. If you can do that without looking, you're building understanding.");}
+
+// Day-by-day document workspace. Each day's content is stored separately.
+function dayDocKey(i=day){return "snv2_daydoc_"+i}
+function loadDayDoc(){
+  const editor=document.getElementById("dayDocEditor");
+  if(!editor)return;
+  editor.innerHTML=localStorage.getItem(dayDocKey())||"";
+  document.getElementById("notebookDayLabel").textContent=String(day+1).padStart(2,"0");
+  document.getElementById("notebookTitle").textContent="My Day "+(day+1)+" Notes";
+  document.getElementById("notebookSaveStatus").textContent="Autosaves as you type";
+}
+function saveDayDoc(){
+  const editor=document.getElementById("dayDocEditor");
+  if(!editor)return;
+  try{
+    localStorage.setItem(dayDocKey(),editor.innerHTML);
+    document.getElementById("notebookSaveStatus").textContent="✓ Saved just now";
+  }catch(e){
+    document.getElementById("notebookSaveStatus").textContent="Storage is full — export your notes and use smaller images";
+  }
+}
+function formatDoc(command,value=null){
+  document.getElementById("dayDocEditor").focus();
+  document.execCommand(command,false,value);
+  saveDayDoc();
+}
+function insertNoteDivider(){
+  document.getElementById("dayDocEditor").focus();
+  document.execCommand("insertHTML",false,'<hr style="border:0;border-top:1px solid rgba(182,156,255,.4);margin:22px 0"><p><br></p>');
+  saveDayDoc();
+}
+function insertDayImage(input){
+  const file=input.files&&input.files[0];if(!file)return;
+  if(!file.type.startsWith("image/")){alert("Please choose an image file.");input.value="";return;}
+  if(file.size>3*1024*1024){alert("Please use an image under 3 MB so your browser storage does not fill up.");input.value="";return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=document.createElement("img");img.src=reader.result;img.alt=file.name;
+    const editor=document.getElementById("dayDocEditor");editor.focus();editor.appendChild(img);
+    const caption=document.createElement("p");caption.innerHTML="<em>"+escapeDocText(file.name)+"</em>";editor.appendChild(caption);
+    saveDayDoc();input.value="";
+  };
+  reader.readAsDataURL(file);
+}
+function escapeDocText(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function insertFlowDiagram(){
+  const title=prompt("Diagram title (e.g. RTL to netlist):","My concept diagram");if(title===null)return;
+  const a=prompt("First step or block:","RTL");if(a===null)return;
+  const b=prompt("Second step or block:","Synthesis");if(b===null)return;
+  const c=prompt("Third step or block:","Gate-level netlist");if(c===null)return;
+  const svg=`<figure contenteditable="false"><svg viewBox="0 0 900 180" role="img" aria-label="${escapeDocText(title)}"><rect x="10" y="35" width="245" height="105" rx="14" fill="#202650" stroke="#ff9bce" stroke-width="3"/><rect x="327" y="35" width="245" height="105" rx="14" fill="#202650" stroke="#b69cff" stroke-width="3"/><rect x="645" y="35" width="245" height="105" rx="14" fill="#202650" stroke="#a5edff" stroke-width="3"/><g fill="#f5f1ff" font-size="25" text-anchor="middle"><text x="132" y="96">${escapeDocText(a).slice(0,22)}</text><text x="449" y="96">${escapeDocText(b).slice(0,22)}</text><text x="767" y="96">${escapeDocText(c).slice(0,22)}</text></g><g stroke="#ff9bce" stroke-width="5" fill="none"><path d="M255 87h72m-15 -12 15 12 -15 12M572 87h73m-15 -12 15 12 -15 12"/></g></svg><figcaption>${escapeDocText(title)}</figcaption></figure><p><br></p>`;
+  const editor=document.getElementById("dayDocEditor");editor.focus();document.execCommand("insertHTML",false,svg);saveDayDoc();
+}
+let diagramDrawing=false,diagramCtx=null;
+function openDiagramPad(){
+  document.getElementById("drawModal").classList.add("show");
+  const canvas=document.getElementById("diagramCanvas");diagramCtx=canvas.getContext("2d");
+  diagramCtx.fillStyle="#0a112c";diagramCtx.fillRect(0,0,canvas.width,canvas.height);
+  diagramCtx.lineCap="round";diagramCtx.lineJoin="round";
+  canvas.onpointerdown=e=>{diagramDrawing=true;const r=canvas.getBoundingClientRect();diagramCtx.beginPath();diagramCtx.moveTo((e.clientX-r.left)*canvas.width/r.width,(e.clientY-r.top)*canvas.height/r.height);canvas.setPointerCapture(e.pointerId)};
+  canvas.onpointermove=e=>{if(!diagramDrawing)return;const r=canvas.getBoundingClientRect();diagramCtx.strokeStyle=document.getElementById("drawColor").value;diagramCtx.lineWidth=Number(document.getElementById("drawSize").value)*canvas.width/r.width;diagramCtx.lineTo((e.clientX-r.left)*canvas.width/r.width,(e.clientY-r.top)*canvas.height/r.height);diagramCtx.stroke()};
+  canvas.onpointerup=canvas.onpointercancel=()=>diagramDrawing=false;
+}
+function clearDiagramPad(){const c=document.getElementById("diagramCanvas");diagramCtx=c.getContext("2d");diagramCtx.fillStyle="#0a112c";diagramCtx.fillRect(0,0,c.width,c.height)}
+function closeDiagramPad(){document.getElementById("drawModal").classList.remove("show")}
+function insertCanvasDiagram(){
+  const canvas=document.getElementById("diagramCanvas"),img=document.createElement("img");
+  img.src=canvas.toDataURL("image/png");img.alt="Hand-drawn study diagram";
+  const editor=document.getElementById("dayDocEditor");editor.focus();editor.appendChild(img);
+  const cap=document.createElement("p");cap.innerHTML="<em>Hand-drawn diagram — add your explanation here.</em>";editor.appendChild(cap);
+  saveDayDoc();closeDiagramPad();
+}
+function exportDayDoc(){
+  const content=document.getElementById("dayDocEditor").innerHTML;
+  const doc=`<!doctype html><html><head><meta charset="utf-8"><title>Silicon Nights — Day ${day+1} Notes</title><style>body{font:16px/1.7 Arial,sans-serif;max-width:850px;margin:40px auto;padding:0 20px;color:#202033}img,svg{max-width:100%;height:auto}figure{border:1px solid #ddd;padding:15px;border-radius:10px}figcaption{color:#666;font-size:13px}</style></head><body><h1>Silicon Nights — Day ${day+1} Notes</h1>${content}</body></html>`;
+  const blob=new Blob([doc],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`silicon-nights-day-${day+1}-notes.html`;a.click();URL.revokeObjectURL(url);
+}
+
 function saveJournal(){["jLearned","jConfused","jQuestions","jNext"].forEach(id=>localStorage.setItem("sn2_"+id,document.getElementById(id).value));alert("Journal saved in this browser.")}
 function exportJournal(){let t=["jLearned","jConfused","jQuestions","jNext"].map(id=>id+"\n"+document.getElementById(id).value).join("\n\n---\n\n"),a=document.createElement("a"),u=URL.createObjectURL(new Blob([t],{type:"text/plain"}));a.href=u;a.download="silicon-nights-learning-journal.txt";a.click();URL.revokeObjectURL(u)}
 function resetProgress(){if(confirm("Reset all learning checkpoints and quiz answers? Journal notes will be kept.")){state.done=[];state.answers={};saveState();renderLesson();renderQuiz();}}
 ["jLearned","jConfused","jQuestions","jNext"].forEach(id=>document.getElementById(id).value=localStorage.getItem("sn2_"+id)||"");
 function particles(){let c=document.getElementById("particles"),ctx=c.getContext("2d"),w,h,pts=[];function resize(){let d=Math.min(devicePixelRatio||1,2);w=c.width=innerWidth*d;h=c.height=innerHeight*d;c.style.width=innerWidth+"px";c.style.height=innerHeight+"px";pts=Array.from({length:Math.min(125,Math.floor(innerWidth/10))},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22*d,vy:(Math.random()-.5)*.22*d,r:(.5+Math.random()*1.4)*d,hue:Math.random()}))}resize();addEventListener("resize",resize);function frame(){ctx.clearRect(0,0,w,h);for(let i=0;i<pts.length;i++){let p=pts[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=w;if(p.x>w)p.x=0;if(p.y<0)p.y=h;if(p.y>h)p.y=0;let col=p.hue<.45?"255,143,203":p.hue<.75?"182,156,255":"165,237,255";ctx.beginPath();ctx.fillStyle=`rgba(${col},${.25+Math.random()*.25})`;ctx.shadowBlur=8;ctx.shadowColor=`rgba(${col},.65)`;ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();if(i%3===0){let q=pts[(i+7)%pts.length],dist=Math.hypot(p.x-q.x,p.y-q.y);if(dist<105*(devicePixelRatio||1)){ctx.beginPath();ctx.strokeStyle=`rgba(${col},${.07*(1-dist/105)})`;ctx.lineWidth=1;ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}}}requestAnimationFrame(frame)}frame()}
+document.getElementById("dayDocEditor").addEventListener("input",saveDayDoc);
+document.getElementById("dayDocEditor").addEventListener("paste",()=>setTimeout(saveDayDoc,100));
 particles();updateProgress();renderLesson();renderQuiz();renderGlossary();renderResources();
 </script>
 </body></html>
